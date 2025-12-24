@@ -5,6 +5,7 @@
 #include <psppower.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "core/platform.h"
 #include "core/timing.h"
@@ -115,14 +116,19 @@ void updateDataCheck(float deltaTime) {
         snprintf(buffer, sizeof(buffer), "%s %s", status, result.filePaths[i]);
         rendererDrawText(10, y, buffer, color);
         y += 15;
+        
+        // Prevent overflow off screen
+        if (y > 240) break;
     }
     
-    y += 20;
-    rendererDrawText(10, y, "Copy your Diablo II files to:", 0xFFFFFFFF);
-    y += 15;
-    rendererDrawText(10, y, "ms0:/PSP/GAME/psparpg/gamedata/", 0xFFFFFF00);
-    y += 30;
-    rendererDrawText(10, y, "Press O to return to menu", 0xFF888888);
+    if (result.fileCount > 0) {
+        y += 10;
+        rendererDrawText(10, y, "Copy your Diablo II files to:", 0xFFFFFFFF);
+        y += 15;
+        rendererDrawText(10, y, "ms0:/PSP/GAME/psparpg/gamedata/", 0xFFFFFF00);
+    }
+    
+    rendererDrawText(10, 255, "Press O to return to menu", 0xFF888888);
     
     datarootFreeCheckResult(&result);
 }
@@ -148,8 +154,7 @@ void updateControls(float deltaTime) {
     rendererDrawText(10, y, "Start: Game Menu/Pause", 0xFFCCCCCC); y += 15;
     rendererDrawText(10, y, "Select: Toggle UI Mode", 0xFFCCCCCC); y += 15;
     
-    y += 30;
-    rendererDrawText(10, y, "Press O to return to menu", 0xFF888888);
+    rendererDrawText(10, 255, "Press O to return to menu", 0xFF888888);
 }
 
 void updateTestScene(float deltaTime) {
@@ -195,21 +200,21 @@ void updateTestScene(float deltaTime) {
     snprintf(analogBuf, sizeof(analogBuf), "Analog: X=%.2f Y=%.2f", analogX, analogY);
     rendererDrawText(10, 200, analogBuf, 0xFFFFFFFF);
     
-    rendererDrawText(10, 250, "Press O to return to menu", 0xFF888888);
+    rendererDrawText(10, 255, "Press O to return to menu", 0xFF888888);
 }
 
 int main(int argc, char *argv[]) {
     setupCallbacks();
     scePowerSetClockFrequency(333, 333, 166);
     
-    // Initialize subsystems
+    // Initialize subsystems in correct order
     platformInit();
+    loggingInit();  // Creates userdata directory
     timingInit();
-    loggingInit();
     rendererInit();
     inputInit();
     menuInit();
-    datarootInit();
+    datarootInit(); // Creates gamedata directory
     
     logInfo("PSP ARPG Engine started");
     
@@ -222,8 +227,8 @@ int main(int argc, char *argv[]) {
     
     // Main loop
     while (running) {
-        float deltaTime = timingGetDeltaTime();
         timingUpdate();
+        float deltaTime = timingGetDeltaTime();
         
         inputUpdate();
         

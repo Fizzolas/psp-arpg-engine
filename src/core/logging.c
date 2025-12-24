@@ -1,4 +1,5 @@
 #include "core/logging.h"
+#include "core/platform.h"
 #include <pspkernel.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,8 +7,15 @@
 static int logFile = -1;
 
 void loggingInit(void) {
+    // Create userdata directory first
+    const char* userDir = platformGetUserDataDir();
+    sceIoMkdir(userDir, 0777);
+    
     // Open log file on Memory Stick
-    logFile = sceIoOpen("ms0:/PSP/GAME/psparpg/userdata/engine.log", 
+    char logPath[256];
+    snprintf(logPath, sizeof(logPath), "%sengine.log", userDir);
+    
+    logFile = sceIoOpen(logPath, 
                         PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
 }
 

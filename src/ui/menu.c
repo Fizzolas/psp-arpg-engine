@@ -2,6 +2,7 @@
 #include "renderer/renderer.h"
 #include "input/input.h"
 #include <string.h>
+#include <stdio.h>
 
 #define MAX_MENU_ITEMS 16
 #define MAX_ITEM_TEXT 64
