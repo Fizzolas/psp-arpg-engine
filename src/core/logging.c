@@ -7,16 +7,13 @@
 static int logFile = -1;
 
 void loggingInit(void) {
-    // Create userdata directory first
-    const char* userDir = platformGetUserDataDir();
-    sceIoMkdir(userDir, 0777);
+    char logPath[512];
+    snprintf(logPath, sizeof(logPath), "%sengine.log", platformGetUserDataDir());
     
-    // Open log file on Memory Stick
-    char logPath[256];
-    snprintf(logPath, sizeof(logPath), "%sengine.log", userDir);
+    // Ensure userdata directory exists
+    sceIoMkdir(platformGetUserDataDir(), 0777);
     
-    logFile = sceIoOpen(logPath, 
-                        PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    logFile = sceIoOpen(logPath, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
 }
 
 void loggingShutdown(void) {

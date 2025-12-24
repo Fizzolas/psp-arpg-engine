@@ -2,7 +2,7 @@
 #include <psprtc.h>
 
 static u64 lastTick = 0;
-static float deltaTime = 0.016f; // Default to ~60fps until first update
+static float deltaTime = 0.016f; // Start with 60 FPS default
 
 void timingInit(void) {
     sceRtcGetCurrentTick(&lastTick);
@@ -17,7 +17,7 @@ void timingUpdate(void) {
     sceRtcGetCurrentTick(&currentTick);
     
     u64 tickDiff = currentTick - lastTick;
-    deltaTime = (float)tickDiff / 1000000.0f; // Convert to seconds
+    deltaTime = (float)tickDiff / 1000000.0f;
     
     // Clamp delta time to prevent huge jumps
     if (deltaTime > 0.1f) deltaTime = 0.1f;
@@ -33,5 +33,5 @@ float timingGetDeltaTime(void) {
 unsigned long timingGetTicks(void) {
     u64 tick;
     sceRtcGetCurrentTick(&tick);
-    return (unsigned long)(tick / 1000); // Return milliseconds
+    return (unsigned long)(tick / 1000);
 }

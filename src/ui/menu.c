@@ -33,7 +33,7 @@ void menuUpdate(float deltaTime) {
 
 void menuRender(void) {
     rendererDrawText(180, 50, "PSP ARPG Engine", 0xFFFFFFFF);
-    rendererDrawText(160, 70, "Diablo II Engine (BYO Files)", 0xFFAAAAAA);
+    rendererDrawText(160, 70, "Diablo II (BYO Files)", 0xFFAAAAAA);
     
     int y = 110;
     for (int i = 0; i < menuItemCount; i++) {
@@ -48,7 +48,7 @@ void menuRender(void) {
 }
 
 void menuAddItem(const char* text) {
-    if (menuItemCount < MAX_MENU_ITEMS) {
+    if (menuItemCount < MAX_MENU_ITEMS && text) {
         strncpy(menuItems[menuItemCount], text, MAX_ITEM_TEXT - 1);
         menuItems[menuItemCount][MAX_ITEM_TEXT - 1] = '\0';
         menuItemCount++;
