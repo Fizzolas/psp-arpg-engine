@@ -11,6 +11,14 @@
 
 ---
 
+## 📋 Quick Links
+
+- 🪟 **[Windows Setup Guide](WINDOWS_SETUP.md)** - Complete WSL installation & troubleshooting
+- 🚀 **[Quick Start Guide](QUICKSTART.md)** - 5-minute setup (for Linux/macOS/WSL)
+- 📖 **[Full Documentation](#table-of-contents)** - This README
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -18,6 +26,8 @@
 - [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [Building](#building)
+  - [Windows](#building-on-windows)
+  - [Linux/macOS](#building-on-linuxmacos)
 - [Installation & Deployment](#installation--deployment)
 - [Directory Structure](#directory-structure)
 - [Controls](#controls)
@@ -41,7 +51,9 @@ This project provides a complete, compilable PSP homebrew ARPG engine scaffold d
 - **Isometric rendering support**: Framework for Diablo II-style isometric view
 - **Data validation**: On-device file check screen showing exactly what's missing
 
-**🚀 New to this project?** Check out [QUICKSTART.md](QUICKSTART.md) for a 5-minute setup guide!
+**🪟 Windows User?** Start with **[WINDOWS_SETUP.md](WINDOWS_SETUP.md)** for WSL installation!
+
+**🚀 Already have PSPSDK?** Jump to **[QUICKSTART.md](QUICKSTART.md)** for 5-minute setup!
 
 ---
 
@@ -91,7 +103,25 @@ This project provides a complete, compilable PSP homebrew ARPG engine scaffold d
 
 ## Quick Start
 
-**Want to get running immediately?** See **[QUICKSTART.md](QUICKSTART.md)** for detailed step-by-step instructions.
+### Windows Users
+
+**See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for complete WSL installation guide.**
+
+**TL;DR:**
+```powershell
+# In PowerShell (Administrator)
+wsl --install
+# Restart, then in Ubuntu:
+wget https://github.com/pspdev/pspdev/releases/latest/download/pspdev-ubuntu-latest-x86_64.tar.gz
+sudo tar -xvf pspdev-ubuntu-latest-x86_64.tar.gz -C /
+echo 'export PSPDEV=/usr/local/pspdev' >> ~/.bashrc
+echo 'export PATH=$PATH:$PSPDEV/bin' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Linux/macOS/WSL Users
+
+**See [QUICKSTART.md](QUICKSTART.md) for detailed step-by-step instructions.**
 
 **TL;DR:**
 ```bash
@@ -115,21 +145,36 @@ cp EBOOT.PBP /path/to/psp/PSP/GAME/psparpg/
 
 ### Development Environment
 
-1. **PSPSDK toolchain** installed and configured
-   - [PSP Dev Toolchain](https://github.com/pspdev/psptoolchain)
-   - Ensure `psp-config` is in your PATH
-   - Verify: `psp-config --version`
+#### Windows
 
-2. **Build tools**:
-   - GNU Make
-   - GCC (psp-gcc)
-   - Binutils (psp-binutils)
+**Option 1: WSL (Recommended)** ⭐
+- Windows 10/11 with WSL 2
+- Ubuntu from Microsoft Store
+- [Full setup guide](WINDOWS_SETUP.md)
 
-3. **PSP Libraries** (included with PSPSDK):
-   - pspgum, pspgu (graphics)
-   - psprtc (real-time clock)
-   - pspaudio (audio stub)
-   - psppower (CPU frequency control)
+**Option 2: Docker**
+- Docker Desktop with WSL 2 backend
+- [Instructions](WINDOWS_SETUP.md#option-2-docker-advanced)
+
+**Option 3: MinPSPW** (Not recommended - outdated)
+
+#### Linux
+
+**Install PSPSDK:**
+```bash
+wget https://github.com/pspdev/pspdev/releases/latest/download/pspdev-ubuntu-latest-x86_64.tar.gz
+sudo tar -xvf pspdev-ubuntu-latest-x86_64.tar.gz -C /
+export PSPDEV=/usr/local/pspdev
+export PATH=$PATH:$PSPDEV/bin
+```
+
+#### macOS
+
+**Use Docker** (native toolchain compilation is complex):
+```bash
+brew install docker
+docker pull pspdev/pspdev
+```
 
 ### Runtime Requirements
 
@@ -141,7 +186,26 @@ cp EBOOT.PBP /path/to/psp/PSP/GAME/psparpg/
 
 ## Building
 
-### Compilation
+### Building on Windows
+
+**See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for complete instructions.**
+
+**Using WSL:**
+```bash
+# In Ubuntu/WSL terminal
+cd psp-arpg-engine
+make clean
+make
+```
+
+**Using Docker:**
+```powershell
+# In PowerShell
+cd C:\Users\YourName\psp-arpg-engine
+docker run --rm -v ${PWD}:/build pspdev/pspdev make
+```
+
+### Building on Linux/macOS
 
 ```bash
 # Clone the repository
@@ -163,30 +227,26 @@ make
 
 ### Troubleshooting Build Errors
 
-#### `psp-config: command not found`
-```bash
-# Add PSPSDK to PATH
-export PSPDEV=/usr/local/pspdev
-export PATH=$PATH:$PSPDEV/bin
-```
-
-#### `undefined reference to 'sceGuInit'`
-Verify Makefile `LIBS` includes: `-lpspgu -lpspgum`
-
-#### Header file errors
-Ensure PSPSDK is fully installed. Reinstall if necessary:
-```bash
-cd /path/to/psptoolchain
-./toolchain.sh
-```
+See [WINDOWS_SETUP.md#troubleshooting](WINDOWS_SETUP.md#troubleshooting) or [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md).
 
 ---
 
 ## Installation & Deployment
 
-### Step 1: Create Directory Structure on PSP
+### On Windows
 
-On your PSP Memory Stick, create:
+**See [WINDOWS_SETUP.md - Deploying to PSP](WINDOWS_SETUP.md#deploying-to-psp)**
+
+**Quick method:**
+1. Connect PSP via USB
+2. Copy `EBOOT.PBP` from `\\wsl$\Ubuntu\home\YourName\psp-arpg-engine\` to `E:\PSP\GAME\psparpg\`
+3. Create `gamedata` and copy Diablo II MPQs
+
+### On Linux/macOS
+
+See [QUICKSTART.md - Installation](QUICKSTART.md#step-2-create-psp-directory-structure)
+
+### Directory Structure on PSP
 
 ```
 ms0:/PSP/GAME/psparpg/
@@ -203,342 +263,78 @@ ms0:/PSP/GAME/psparpg/
     └── d2exp.mpq
 ```
 
-### Step 2: Copy Engine
-
-1. Connect PSP via USB (USB mode)
-2. Copy `EBOOT.PBP` to `ms0:/PSP/GAME/psparpg/`
-3. Disconnect PSP
-
-### Step 3: Copy Your Diablo II Files
-
-**⚠️ IMPORTANT: You must own a legal copy of Diablo II**
-
-1. Locate your Diablo II installation directory
-   - Windows: Usually `C:\Program Files (x86)\Diablo II\`
-   - macOS: Check Battle.net install location
-2. Find the `.mpq` files (typically in game root)
-3. Copy these 6 files to `ms0:/PSP/GAME/psparpg/gamedata/`:
-   - `d2data.mpq` (~60MB)
-   - `d2char.mpq` (~180MB)
-   - `d2sfx.mpq` (~50MB)
-   - `d2music.mpq` (~65MB)
-   - `d2video.mpq` (~100MB)
-   - `d2exp.mpq` (~250MB, if you have Lord of Destruction)
-
-### Step 4: Run
-
-1. Launch PSP XMB
-2. Navigate to **Game → Memory Stick**
-3. Select **PSP ARPG Engine**
-4. Press X to launch
-5. **First run**: Go to "Data Check" to verify files copied correctly
-
----
-
-## Directory Structure
-
-<details>
-<summary>Click to expand full source tree</summary>
-
-```
-psp-arpg-engine/
-├── include/
-│   ├── core/
-│   │   ├── platform.h      # Platform abstraction
-│   │   ├── timing.h        # Delta time & ticks
-│   │   └── logging.h       # File logging
-│   ├── renderer/
-│   │   ├── renderer.h      # GU renderer
-│   │   └── isometric.h     # Isometric projection
-│   ├── input/
-│   │   ├── input.h         # Input system
-│   │   └── bindings.h      # Config bindings
-│   ├── audio/
-│   │   └── audio_stub.h    # Audio interface (stub)
-│   ├── ui/
-│   │   ├── menu.h          # Menu system
-│   │   └── hud.h           # HUD rendering
-│   ├── game/
-│   │   ├── world.h         # World/level management
-│   │   └── entity.h        # Entity system
-│   └── assets/
-│       ├── dataroot.h      # File resolver
-│       ├── archive.h       # MPQ interface
-│       └── filesystem.h    # Virtual FS
-├── src/
-│   ├── main.c              # Entry point & main loop
-│   ├── core/               # Platform, timing, logging
-│   ├── renderer/           # GU renderer & isometric
-│   ├── input/              # Input handling & bindings
-│   ├── audio/              # Audio stub
-│   ├── ui/                 # Menu & HUD
-│   ├── game/               # World & entities
-│   └── assets/             # Asset pipeline
-├── Makefile                # PSPSDK build script
-├── README.md               # This file
-├── QUICKSTART.md           # 5-minute setup guide
-├── .gitignore
-└── ICON0.PNG               # PSP app icon
-```
-
-</details>
-
 ---
 
 ## Controls
 
-### Default PSP Button Mapping
+See full control mapping in [QUICKSTART.md - Controls](QUICKSTART.md#controls).
 
-#### Core Actions (No Modifiers)
-
-| Button | Function |
-|--------|----------|
-| **Analog Stick** | Move character |
-| **D-Pad** | UI navigation / Belt selection (context) |
-| **Cross (✕)** | Primary action (Attack / Interact / Confirm) |
-| **Circle (○)** | Secondary action (Cancel / Back) |
-| **Square (□)** | Quick potion / Action wheel |
-| **Triangle (△)** | Inventory / Character panel |
-| **Start** | Pause / Game menu |
-| **Select** | Toggle UI cursor mode |
-
-#### Modifier-Based Skills
-
-| Modifier + Button | Skill |
-|-------------------|-------|
-| **L + ✕/○/□/△** | Skills 1-4 (Set A) |
-| **R + ✕/○/□/△** | Skills 5-8 (Set B) |
-
-#### Advanced Functions (Chord Combos)
-
-| Combo | Function |
-|-------|----------|
-| **L + R + △** | World Map |
-| **L + R + □** | Skills Panel |
-| **L + R + ○** | Quest Log |
-| **L + R + ✕** | Town Portal |
-| **L + R + Select** | Drop Item |
-
-### Design Philosophy
-
-All Diablo II ARPG functions are fully accessible using only PSP hardware through:
-
-1. **Context-sensitive mappings**: Buttons adapt meaning (town vs combat vs menus)
-2. **Modifier chords**: L/R triggers unlock 8 skill slots
-3. **Radial menus**: Square opens action wheel (planned)
-4. **UI cursor mode**: Select enables virtual mouse for inventory
-
-This provides **100% feature parity** with PC despite hardware constraints.
+**Summary:**
+- **Analog Stick**: Movement
+- **D-Pad**: UI navigation
+- **X**: Primary action
+- **O**: Cancel/Secondary
+- **L/R + Buttons**: Skills 1-8
+- **L+R + Buttons**: Advanced functions (map, town portal, etc.)
 
 ---
 
 ## File Requirements
 
-### Required Diablo II Files
+See [WINDOWS_SETUP.md - Copy Diablo II Files](WINDOWS_SETUP.md#copy-diablo-ii-files-windows--psp) for Windows-specific instructions.
 
-The engine validates these on startup:
-
-| File | Purpose | Size (approx) |
-|------|---------|---------------|
-| `d2data.mpq` | Core game data, levels, objects | ~60 MB |
-| `d2char.mpq` | Character graphics, animations | ~180 MB |
-| `d2sfx.mpq` | Sound effects | ~50 MB |
-| `d2music.mpq` | Music tracks | ~65 MB |
-| `d2video.mpq` | Cinematics | ~100 MB |
-| `d2exp.mpq` | Expansion content (LoD) | ~250 MB |
-
-### Data Check Screen
-
-**Main Menu → Data Check**
-
-- ✅ **Green `[OK]`**: File found and accessible
-- ❌ **Red `[MISSING]`**: File not found (shows expected path)
-
-**If files are missing**, the engine will still run but display placeholder graphics.
+**Required files** (copy to `gamedata/`):
+- `d2data.mpq` (~60MB)
+- `d2char.mpq` (~180MB)
+- `d2sfx.mpq` (~50MB)
+- `d2music.mpq` (~65MB)
+- `d2video.mpq` (~100MB)
+- `d2exp.mpq` (~250MB)
 
 ---
 
 ## Troubleshooting
 
-### Build Issues
+### Windows-Specific Issues
 
-See [Building](#building) section above.
+See [WINDOWS_SETUP.md - Troubleshooting](WINDOWS_SETUP.md#troubleshooting)
 
-### Runtime Issues
+### General Issues
 
-#### Black screen on launch
-
-**Causes:**
-1. CFW not installed
-2. Wrong directory structure
-3. EBOOT.PBP corrupted
-
-**Solutions:**
-- Verify CFW: Settings → System Information → Should show "6.61 PRO-C"
-- Recreate directory structure (see [Installation](#installation--deployment))
-- Rebuild: `make clean && make`
-- Try rebooting PSP
-
-#### "Corrupted Data" error
-
-**Cause**: Invalid EBOOT.PBP
-
-**Solution**: Rebuild from source
-```bash
-make clean
-make
-# Verify EBOOT.PBP is >100KB
-ls -lh EBOOT.PBP
-```
-
-#### No files detected (all red in Data Check)
-
-**Causes:**
-1. Files in wrong location
-2. Case-sensitive filenames
-3. Incomplete copy
-
-**Solutions:**
-- Verify path: `ms0:/PSP/GAME/psparpg/gamedata/`
-- Check exact filenames (lowercase `.mpq`)
-- Re-copy files (ensure they fully transfer)
-- Verify file sizes match originals
-
-#### Controls not responding
-
-**Solutions:**
-1. Run **Test Scene** from main menu
-2. Delete `userdata/bindings.ini` to reset
-3. Check `userdata/engine.log` for errors
-
-### Getting More Help
-
-Check `userdata/engine.log` on your PSP for detailed error messages.
-
-**GitHub Issues**: [Report bugs here](https://github.com/Fizzolas/psp-arpg-engine/issues)
-
-Include:
-- PSP model & CFW version
-- PSPSDK version
-- Build log (if compilation issue)
-- Contents of `engine.log`
-- Steps to reproduce
+See [QUICKSTART.md - Troubleshooting](QUICKSTART.md#troubleshooting) and [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md)
 
 ---
 
 ## Development Roadmap
 
-### Phase 1: Engine Foundation ✅ (Current - v0.1)
-- [x] PSP initialization & callbacks
-- [x] Rendering pipeline (GU + software text)
-- [x] Input system with full PSP mapping
-- [x] UI scaffolding (menus, HUD)
-- [x] Asset pipeline interfaces
-- [x] Data validation screen
-
-### Phase 2: Asset Parsing 🔄 (Next - v0.2)
-- [ ] MPQ archive extraction (StormLib port)
-- [ ] DCC/DC6 sprite decoder
-- [ ] DS1 map format parser
-- [ ] COF animation data
-- [ ] TBL/Excel data readers
-- [ ] Palette (PAL/PLT) support
-
-### Phase 3: Game Logic (v0.3)
-- [ ] Character stats & skills
-- [ ] Inventory system
-- [ ] Item generation
-- [ ] Monster AI
-- [ ] Combat mechanics
-- [ ] Quest system
-
-### Phase 4: Polish (v1.0)
-- [ ] Audio playback (MP3/WAV)
-- [ ] Particle effects
-- [ ] Minimap
-- [ ] Save/load system
-- [ ] Multiplayer (ad-hoc Wi-Fi)
+See [QUICKSTART.md - Development Roadmap](QUICKSTART.md#development-roadmap)
 
 ---
 
 ## Architecture
 
-### Modular Design
-
-```
-Core        → Platform abstraction, timing, logging
-Renderer    → GU graphics, isometric projection, software text
-Input       → PSP controls, action mapping, bindings
-Audio       → Sound/music playback (stub)
-UI          → Menus, HUD, dialogs
-Game        → World state, entities, game logic
-Assets      → File I/O, archive parsing, data loading
-```
-
-### Data-Driven Philosophy
-
-- **Actions not buttons**: Game code references `ACTION_PRIMARY`, not `PSP_CTRL_CROSS`
-- **Config-based bindings**: `bindings.ini` allows remapping
-- **Asset abstraction**: `IArchive` and `IFileSystem` interfaces
-- **Runtime validation**: File checks with helpful error messages
-
-### Memory Management
-
-PSP has **32MB RAM** (~24MB available for homebrew). Engine uses:
-
-- **Static allocation** for core systems
-- **Streaming** for large assets (textures, audio)
-- **Object pools** for entities (256 max)
-- **VRAM** for framebuffers (512×272×2 buffers)
+See [QUICKSTART.md - Architecture](QUICKSTART.md#architecture)
 
 ---
 
 ## Contributing
 
-Contributions welcome! Areas needing help:
-
-1. **MPQ parsing**: Port StormLib or write custom parser
-2. **DCC/DC6 decoders**: Sprite format implementations
-3. **Performance**: Optimize rendering pipeline
-4. **Audio**: Implement music/SFX playback
-5. **Documentation**: Improve guides and comments
-
-**Before contributing**:
-- Test on real PSP hardware
-- Follow existing code style
-- Update README if adding features
-- No copyrighted assets in PRs
+Contributions welcome! See [QUICKSTART.md - Contributing](QUICKSTART.md#contributing)
 
 ---
 
 ## License
 
-This engine scaffold is provided as-is for educational and personal use.
-
-**Important Legal Notes**:
-- Engine code: Open-source (license TBD - check LICENSE file)
-- Diablo II game files: **© Blizzard Entertainment** - NOT included
-- Users MUST own legal copy of Diablo II
-- Do NOT distribute Diablo II game files
-
----
-
-## Credits & Acknowledgments
-
-- **PSPSDK**: pspdev community
-- **Diablo II RE**: Phrozen Keep, d2mods community
-- **Inspiration**: OpenDiablo2, DevilutionX
-- **Tools**: StormLib (MPQ reference)
+See [QUICKSTART.md - License](QUICKSTART.md#license)
 
 ---
 
 ## Support
 
-**Issues**: [GitHub Issues](https://github.com/Fizzolas/psp-arpg-engine/issues)
-
-**Discussions**: [GitHub Discussions](https://github.com/Fizzolas/psp-arpg-engine/discussions)
-
-**Quick Help**: See [QUICKSTART.md](QUICKSTART.md) and [Troubleshooting](#troubleshooting)
+**Windows Users:** [WINDOWS_SETUP.md](WINDOWS_SETUP.md)  
+**Quick Setup:** [QUICKSTART.md](QUICKSTART.md)  
+**Build Issues:** [BUILD_VERIFICATION.md](BUILD_VERIFICATION.md)  
+**GitHub Issues:** [Report bugs](https://github.com/Fizzolas/psp-arpg-engine/issues)
 
 ---
 

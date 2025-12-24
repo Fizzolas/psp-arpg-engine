@@ -1,407 +1,479 @@
 # Windows Setup Guide - PSP ARPG Engine
 
-**Complete guide for Windows 10/11 users to set up PSP development**
+**Complete guide for building PSP homebrew on Windows using WSL**
 
 ---
 
-## 🪟 Three Ways to Build on Windows
+## ✅ Your Installation Status
 
-### **Option 1: WSL (Recommended)** ⭐
-- **Officially supported** by PSPSDK team
-- Always up-to-date with latest toolchain
-- Easy setup, full Linux compatibility
-- **Best for: Everyone, especially beginners**
-
-### **Option 2: MinPSPW (Native Windows)**
-- No WSL required, fully native
-- **Outdated** (last updated 2015)
-- May have missing dependencies
-- **Best for: Advanced users who can't use WSL**
-
-### **Option 3: Docker**
-- Cross-platform container
-- Always up-to-date
-- Requires Docker Desktop
-- **Best for: Users familiar with Docker**
+Based on your log, PSPSDK is **already installed correctly**! You just need to configure your shell environment.
 
 ---
 
-## ✅ Option 1: WSL Setup (RECOMMENDED)
+## Quick Fix (If you just installed PSPSDK)
 
-### Prerequisites
-- Windows 10 version 2004+ or Windows 11
-- Administrator access
-- ~2GB free disk space
-
-### Step 1: Install WSL
-
-**Open PowerShell as Administrator:**
-1. Press `Win + X`
-2. Select "Windows PowerShell (Admin)" or "Terminal (Admin)"
-3. Run:
-
-```powershell
-wsl --install
-```
-
-4. **Restart your computer** when prompted
-
-### Step 2: Set Up Ubuntu
-
-After reboot, Ubuntu will open automatically:
-
-1. Create a UNIX username (lowercase, no spaces)
-2. Create a password (won't show when typing - this is normal)
-
-### Step 3: Update Ubuntu
-
-In the Ubuntu terminal:
+Your installation succeeded, but the PATH isn't set yet. Run these commands:
 
 ```bash
-sudo apt-get update
-sudo apt-get upgrade -y
-```
+# Set environment variables
+echo 'export PSPDEV=/usr/local/pspdev' >> ~/.bashrc
+echo 'export PATH=$PATH:$PSPDEV/bin' >> ~/.bashrc
 
-### Step 4: Install Dependencies
-
-```bash
-sudo apt-get install build-essential cmake pkgconf libreadline8 libusb-0.1-4 libgpgme11 libarchive-tools fakeroot wget git -y
-```
-
-### Step 5: Download PSPSDK
-
-```bash
-cd ~
-wget https://github.com/pspdev/pspdev/releases/latest/download/pspdev-ubuntu-latest-x86_64.tar.gz
-```
-
-### Step 6: Extract PSPSDK
-
-```bash
-sudo tar -xvf pspdev-ubuntu-latest-x86_64.tar.gz -C /
-```
-
-(This extracts to `/usr/local/pspdev` - takes ~2 minutes)
-
-### Step 7: Set Environment Variables
-
-```bash
-nano ~/.bashrc
-```
-
-**Add these lines at the bottom:**
-
-```bash
-export PSPDEV=/usr/local/pspdev
-export PATH=$PATH:$PSPDEV/bin
-```
-
-**Save and exit:**
-- Press `Ctrl + O` (save)
-- Press `Enter` (confirm)
-- Press `Ctrl + X` (exit)
-
-### Step 8: Reload Configuration
-
-```bash
+# Reload shell configuration
 source ~/.bashrc
-```
 
-### Step 9: Verify Installation
-
-```bash
+# Test installation
 psp-config --pspdev-path
+# Should output: /usr/local/pspdev
 ```
 
-✅ **Should output:** `/usr/local/pspdev`
+**If that works, skip to [Building the Engine](#building-the-engine) below.**
 
 ---
 
-## 🏗️ Building the PSP ARPG Engine (WSL)
+## Full Windows Setup (From Scratch)
 
-### Clone the Repository
+### Option 1: WSL (Recommended) ⭐
+
+**Advantages:**
+- Official PSPSDK support
+- Latest toolchain updates
+- Same commands as Linux/macOS
+- Works alongside Windows tools
+
+#### Step 1: Install WSL
+
+**On Windows 10/11:**
+
+1. Open **PowerShell as Administrator**
+2. Run:
+   ```powershell
+   wsl --install
+   ```
+3. Restart your computer when prompted
+4. After reboot, Ubuntu will auto-launch and ask for username/password
+
+**Already have WSL?** Skip to Step 2.
+
+**Troubleshooting:**
+- If `wsl --install` fails, enable "Virtual Machine Platform" in Windows Features
+- Settings → Apps → Optional Features → More Windows Features → ✅ Virtual Machine Platform
+
+#### Step 2: Install PSPSDK in WSL
+
+**Open Ubuntu from Start Menu, then run:**
 
 ```bash
-cd ~
-git clone https://github.com/Fizzolas/psp-arpg-engine.git
-cd psp-arpg-engine
+# Download latest PSPSDK
+wget https://github.com/pspdev/pspdev/releases/latest/download/pspdev-ubuntu-latest-x86_64.tar.gz
+
+# Extract to /usr/local
+sudo tar -xvf pspdev-ubuntu-latest-x86_64.tar.gz -C /
+
+# Add to PATH
+echo 'export PSPDEV=/usr/local/pspdev' >> ~/.bashrc
+echo 'export PATH=$PATH:$PSPDEV/bin' >> ~/.bashrc
+
+# Reload shell
+source ~/.bashrc
+
+# Verify installation
+psp-config --pspdev-path
+# Expected output: /usr/local/pspdev
+
+psp-gcc --version
+# Should show: psp-gcc (GCC) ...
 ```
 
-### Build
+**If you see version numbers, installation succeeded!** ✅
 
-```bash
-make clean
-make
-```
-
-✅ **Success:** You should see `EBOOT.PBP` created (~500KB)
-
-Verify:
-```bash
-ls -lh EBOOT.PBP
-```
-
----
-
-## 📁 Accessing Windows Files from WSL
+#### Step 3: Access Windows Files from WSL
 
 Your Windows drives are mounted at `/mnt/`:
 
 ```bash
-# C: drive
+# Navigate to your Windows user folder
 cd /mnt/c/Users/YourName/
 
-# D: drive
-cd /mnt/d/
+# List Windows files
+ls
 
-# List your Windows user folder
-ls /mnt/c/Users/
+# Example: Clone repo to Windows Desktop
+cd /mnt/c/Users/YourName/Desktop
+git clone https://github.com/Fizzolas/psp-arpg-engine.git
+cd psp-arpg-engine
 ```
 
-### Copy EBOOT to Windows
-
-```bash
-# Example: Copy to your Downloads folder
-cp EBOOT.PBP /mnt/c/Users/YourName/Downloads/
-```
+**Why this matters:** You can edit files in Windows (VS Code, Notepad++) and compile in WSL!
 
 ---
 
-## 💾 Deploying to PSP (from Windows)
+### Option 2: Docker (Advanced)
 
-### Connect PSP via USB
+**Use if you:**
+- Already have Docker Desktop
+- Want isolated build environment
+- Need reproducible builds
 
-1. On PSP: Settings → USB Connection
-2. PSP appears as drive (e.g., `E:\`)
-
-### Create Directory Structure
-
-**Open File Explorer (Win + E):**
-
-Navigate to your PSP drive, then create:
-
-```
-E:\PSP\GAME\psparpg\
-```
-
-### Copy Files
-
-1. **Engine:**
-   - Copy `EBOOT.PBP` to `E:\PSP\GAME\psparpg\`
-
-2. **Game Data Folders** (create these):
-   ```
-   E:\PSP\GAME\psparpg\gamedata\
-   E:\PSP\GAME\psparpg\userdata\
-   ```
-
-3. **Your Diablo II Files:**
-   - Copy your MPQ files to `E:\PSP\GAME\psparpg\gamedata\`
-
-### Required Diablo II Files
-
-Copy these from your Diablo II installation (usually `C:\Program Files (x86)\Diablo II\`):
-
-```
-d2data.mpq   → E:\PSP\GAME\psparpg\gamedata\d2data.mpq
-d2char.mpq   → E:\PSP\GAME\psparpg\gamedata\d2char.mpq
-d2sfx.mpq    → E:\PSP\GAME\psparpg\gamedata\d2sfx.mpq
-d2music.mpq  → E:\PSP\GAME\psparpg\gamedata\d2music.mpq
-d2video.mpq  → E:\PSP\GAME\psparpg\gamedata\d2video.mpq
-d2exp.mpq    → E:\PSP\GAME\psparpg\gamedata\d2exp.mpq
-```
-
----
-
-## 🔧 Windows-Specific Tips
-
-### Opening Ubuntu Terminal in a Folder
-
-1. Navigate to folder in File Explorer
-2. **Shift + Right-click** in empty space
-3. Select "Open Linux shell here"
-
-### Editing Files with VS Code (from WSL)
-
-```bash
-# Install VS Code in Windows first, then from WSL:
-code .
-```
-
-VS Code will open with full WSL integration!
-
-### Performance Tips
-
-- Store project files in WSL filesystem (`~/psp-arpg-engine`) not Windows (`/mnt/c/...`)
-- **Why:** 10x faster compilation due to filesystem differences
-
----
-
-## 🪟 Option 2: MinPSPW (Native Windows)
-
-### ⚠️ Warning
-- Outdated (2015)
-- May have dependency issues
-- Not recommended unless you have specific reasons
-
-### Download
-
-1. Go to: [MinPSPW SourceForge](https://sourceforge.net/projects/minpspw/)
-2. Download **version 0.10.0** (most reliable)
-
-### Install
-
-1. Run installer
-2. Install to `C:\pspsdk` (or your preferred location)
-3. Add to PATH:
-   - Right-click "This PC" → Properties
-   - Advanced System Settings → Environment Variables
-   - Edit `Path`, add: `C:\pspsdk\bin`
-
-### Build
-
-Open Command Prompt in project folder:
-
-```cmd
-cd C:\path\to\psp-arpg-engine
-make
-```
-
-### Known Issues
-
-- **Missing DLLs:** Download Visual C++ Redistributable 2013
-- **make: command not found:** Add MinGW to PATH
-- **Library errors:** Version 0.10.0 is most stable
-
----
-
-## 🐳 Option 3: Docker (Windows)
-
-### Prerequisites
+#### Setup
 
 1. Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/)
-2. Enable WSL 2 backend (default on Windows 11)
-
-### Pull Image
+2. Enable WSL 2 backend in Docker settings
+3. Open PowerShell or Command Prompt:
 
 ```powershell
+# Pull PSPSDK image
 docker pull pspdev/pspdev
-```
 
-### Build Project
+# Navigate to your project
+cd C:\Users\YourName\psp-arpg-engine
 
-```powershell
-cd C:\path\to\psp-arpg-engine
+# Build using Docker
 docker run --rm -v ${PWD}:/build pspdev/pspdev make
 ```
 
-Output: `EBOOT.PBP` in current directory
+**Output:** `EBOOT.PBP` in current directory
 
 ---
 
-## 🐛 Troubleshooting (Windows-Specific)
+### Option 3: MinPSPW (Native Windows - Not Recommended)
 
-### WSL Issues
+**⚠️ WARNING:** MinPSPW is outdated (last updated 2015) and may have missing libraries.
 
-#### "WSL 2 requires an update to its kernel component"
+**Only use if WSL/Docker don't work for you.**
 
-**Fix:**
-```powershell
-wsl --update
-```
+1. Download [MinPSPW 0.11.2](https://sourceforge.net/projects/minpspw/files/)
+2. Extract to `C:\pspsdk\`
+3. Add to Windows PATH:
+   - Search → "Environment Variables"
+   - Edit "Path" → New → `C:\pspsdk\bin`
+4. Open Command Prompt:
+   ```cmd
+   psp-gcc --version
+   ```
 
-#### "The WSL optional component is not enabled"
+**Known Issues:**
+- Missing `psplink` libraries
+- Outdated GCC version (4.x instead of 11.x)
+- May fail on modern Windows 11
 
-**Fix:**
-1. Open PowerShell as Admin
-2. Run:
-```powershell
-dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-```
-3. Restart computer
+---
 
-#### Ubuntu terminal won't open
+## Building the Engine
 
-**Fix:**
-```powershell
-wsl --set-default Ubuntu
-wsl ~
-```
-
-#### Can't find files copied from Windows
-
-**Remember:** Windows paths in WSL are `/mnt/c/` not `C:\`
+### Using WSL (Recommended)
 
 ```bash
-# Wrong
-cd C:\Users\YourName
-
-# Correct
-cd /mnt/c/Users/YourName
-```
-
-### MinPSPW Issues
-
-#### "cannot find -lpspgu"
-
-**Cause:** Incomplete installation
-
-**Fix:** Reinstall MinPSPW 0.10.0 or switch to WSL
-
-#### "psp-gcc: command not found"
-
-**Fix:** Add to PATH:
-- `C:\pspsdk\bin`
-- `C:\pspsdk\psp\bin`
-
-### Docker Issues
-
-#### "Hardware assisted virtualization and data execution protection must be enabled"
-
-**Fix:** Enable VT-x/AMD-V in BIOS
-
-#### "error during connect"
-
-**Fix:** Start Docker Desktop application
-
----
-
-## 📚 Additional Resources
-
-- [Official PSPSDK Docs](https://pspdev.github.io/)
-- [WSL Documentation](https://learn.microsoft.com/en-us/windows/wsl/)
-- [MinPSPW Project](https://sourceforge.net/projects/minpspw/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
----
-
-## ✅ Quick Verification Checklist
-
-After setup, verify these work:
-
-```bash
-# Check PSPSDK path
-psp-config --pspdev-path
-
-# Check compiler
-psp-gcc --version
-
-# Check make
-make --version
-
-# Clone and build test
-cd ~
+# Clone repo (if not done already)
+cd /mnt/c/Users/YourName/Desktop
 git clone https://github.com/Fizzolas/psp-arpg-engine.git
 cd psp-arpg-engine
-make clean && make
+
+# Build
+make clean
+make
+
+# Verify output
 ls -lh EBOOT.PBP
+# Should show ~200-300KB file
 ```
 
-All commands should complete without errors!
+### Using Windows File Explorer + WSL
+
+1. Open File Explorer
+2. Navigate to `\\wsl$\Ubuntu\home\YourName\psp-arpg-engine\`
+3. Double-click `EBOOT.PBP` to view (or copy to PSP)
+
+**Pro Tip:** Pin this location to Quick Access for easy access!
 
 ---
 
-**Need more help?** Check [QUICKSTART.md](QUICKSTART.md) for general usage or [README.md](README.md) for full documentation.
+## Deploying to PSP
 
-**Windows 11 users:** WSL comes pre-configured and updated - you have the smoothest experience!
+### Method 1: Direct USB Copy (Easiest)
+
+1. Connect PSP via USB (USB mode)
+2. Wait for Windows to detect as drive (e.g., `E:\`)
+3. Using File Explorer:
+   - Navigate to PSP drive
+   - Create folders: `PSP\GAME\psparpg\`
+   - Copy `EBOOT.PBP` from WSL location (see above)
+
+**WSL Command Line Method:**
+
+```bash
+# Find PSP drive letter (check File Explorer)
+PSP_DRIVE="/mnt/e"  # Change 'e' to match your PSP drive
+
+# Create directory structure
+mkdir -p "${PSP_DRIVE}/PSP/GAME/psparpg/gamedata"
+mkdir -p "${PSP_DRIVE}/PSP/GAME/psparpg/userdata"
+
+# Copy EBOOT
+cp EBOOT.PBP "${PSP_DRIVE}/PSP/GAME/psparpg/"
+
+# Verify
+ls "${PSP_DRIVE}/PSP/GAME/psparpg/"
+```
+
+### Method 2: Network Transfer (WiFi)
+
+**If you have PSP WiFi set up:**
+
+1. Install [FTP Server homebrew](https://github.com/xerpi/ftpvita) on PSP
+2. In WSL:
+   ```bash
+   # Install FTP client
+   sudo apt install lftp
+   
+   # Connect to PSP (replace IP)
+   lftp ftp://PSP_IP_ADDRESS
+   
+   # Upload
+   cd /PSP/GAME/psparpg/
+   put EBOOT.PBP
+   ```
+
+---
+
+## Copy Diablo II Files (Windows → PSP)
+
+### Finding Your Diablo II Installation
+
+**Common locations:**
+- `C:\Program Files (x86)\Diablo II\`
+- `C:\Program Files\Diablo II\`
+- Battle.net client install folder
+
+**WSL Path Conversion:**
+```bash
+# Windows: C:\Program Files (x86)\Diablo II
+# WSL:     /mnt/c/Program Files (x86)/Diablo II
+```
+
+### Copy Using Windows Explorer (Easiest)
+
+1. Connect PSP via USB
+2. Navigate to PSP drive (e.g., `E:\`)
+3. Open: `E:\PSP\GAME\psparpg\gamedata\`
+4. Open Diablo II folder in another window
+5. Copy these 6 files:
+   - `d2data.mpq`
+   - `d2char.mpq`
+   - `d2sfx.mpq`
+   - `d2music.mpq`
+   - `d2video.mpq`
+   - `d2exp.mpq`
+
+### Copy Using WSL Command Line
+
+```bash
+# Set paths
+D2_PATH="/mnt/c/Program Files (x86)/Diablo II"
+PSP_DRIVE="/mnt/e"
+PSP_GAMEDATA="${PSP_DRIVE}/PSP/GAME/psparpg/gamedata"
+
+# Create directory
+mkdir -p "${PSP_GAMEDATA}"
+
+# Copy all MPQ files
+cp "${D2_PATH}/d2data.mpq" "${PSP_GAMEDATA}/"
+cp "${D2_PATH}/d2char.mpq" "${PSP_GAMEDATA}/"
+cp "${D2_PATH}/d2sfx.mpq" "${PSP_GAMEDATA}/"
+cp "${D2_PATH}/d2music.mpq" "${PSP_GAMEDATA}/"
+cp "${D2_PATH}/d2video.mpq" "${PSP_GAMEDATA}/"
+cp "${D2_PATH}/d2exp.mpq" "${PSP_GAMEDATA}/"
+
+# Verify
+ls -lh "${PSP_GAMEDATA}"
+# Should show 6 .mpq files totaling ~700MB
+```
+
+---
+
+## Development Workflow
+
+### Recommended Setup
+
+**Editor:** VS Code on Windows  
+**Compiler:** WSL Ubuntu  
+**File Location:** Windows filesystem (accessible from both)
+
+#### Install VS Code Extensions
+
+1. [Remote - WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl)
+2. [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
+
+#### Open Project in VS Code
+
+**From WSL:**
+```bash
+cd psp-arpg-engine
+code .
+```
+
+**From Windows:**
+- File → Open Folder → `\\wsl$\Ubuntu\home\YourName\psp-arpg-engine`
+
+#### Build from VS Code Terminal
+
+1. Terminal → New Terminal
+2. Select "Ubuntu (WSL)"
+3. Run:
+   ```bash
+   make
+   ```
+
+---
+
+## Troubleshooting
+
+### "psp-config: command not found" (AFTER installation)
+
+**Cause:** PATH not set in current shell session
+
+**Fix:**
+```bash
+# Reload .bashrc
+source ~/.bashrc
+
+# OR restart WSL
+exit
+# Then reopen Ubuntu from Start Menu
+```
+
+### "Cannot find -lpspgu" or similar linker errors
+
+**Cause:** PSPSDK libraries not in expected location
+
+**Fix:**
+```bash
+# Verify library location
+ls /usr/local/pspdev/psp/sdk/lib/ | grep libpspgu
+# Should show: libpspgu.a
+
+# If missing, reinstall PSPSDK
+sudo rm -rf /usr/local/pspdev
+# Then repeat installation steps
+```
+
+### "tar: Removing leading `/` from member names"
+
+**This is NORMAL.** It's a safety warning from tar, not an error. Installation succeeded.
+
+### WSL network issues downloading PSPSDK
+
+**Try alternative mirror:**
+```bash
+wget https://github.com/pspdev/pspdev/releases/download/v20251201/pspdev-ubuntu-latest-x86_64.tar.gz
+```
+
+### "make: command not found" in WSL
+
+**Install build tools:**
+```bash
+sudo apt update
+sudo apt install build-essential git
+```
+
+### PSP drive not showing in Windows
+
+**Solutions:**
+1. Disconnect/reconnect USB cable
+2. On PSP: Settings → USB Connection
+3. Try different USB port (USB 2.0, not 3.0)
+4. Restart PSP
+
+### Files copy slowly to PSP
+
+**Normal.** PSP uses USB 2.0 (max ~10MB/s). Copying 700MB of Diablo II files takes ~2-3 minutes.
+
+**Progress bar stuck?** Wait 30 seconds before canceling.
+
+### "Access denied" copying to PSP
+
+**Cause:** PSP memory stick write-protected
+
+**Fix:** Check physical write-protect switch on Memory Stick Pro Duo card.
+
+---
+
+## Performance Tips
+
+### Speed Up WSL Builds
+
+**Clone to WSL filesystem (not `/mnt/c/`):**
+
+```bash
+# SLOW (Windows filesystem)
+cd /mnt/c/Users/YourName/Desktop/psp-arpg-engine
+make  # ~15 seconds
+
+# FAST (WSL filesystem)
+cd ~/psp-arpg-engine
+make  # ~3 seconds
+```
+
+**Why?** `/mnt/c` has file system translation overhead.
+
+**Access from Windows:** `\\wsl$\Ubuntu\home\YourName\psp-arpg-engine`
+
+### Parallel Compilation
+
+```bash
+# Use multiple CPU cores
+make -j$(nproc)
+# Compiles ~3x faster on quad-core systems
+```
+
+---
+
+## Comparison: Build Methods
+
+| Method | Setup Time | Build Speed | Updates | Recommended |
+|--------|-----------|-------------|---------|-------------|
+| **WSL** | 10 min | Fast | Auto | ✅ Yes |
+| Docker | 15 min | Medium | Auto | ⚠️ Advanced users |
+| MinPSPW | 5 min | Slow | Manual | ❌ No (outdated) |
+
+---
+
+## Next Steps
+
+Once your environment is set up:
+
+1. ✅ Build the engine: `make`
+2. ✅ Copy EBOOT.PBP to PSP
+3. ✅ Copy Diablo II MPQ files
+4. ✅ Test on PSP (Main Menu → Data Check)
+5. 📖 Read [QUICKSTART.md](QUICKSTART.md) for usage guide
+6. 🔧 Start modding! Check [README.md](README.md) for architecture
+
+---
+
+## Getting Help
+
+**Before asking:**
+- ✅ Run `psp-gcc --version` and `psp-config --version`
+- ✅ Check `engine.log` on PSP at `ms0:/PSP/GAME/psparpg/userdata/`
+- ✅ Try `make clean && make`
+
+**Where to ask:**
+- [GitHub Issues](https://github.com/Fizzolas/psp-arpg-engine/issues)
+- [PSP Homebrew Discord](https://discord.gg/bePrj9W)
+
+**Include in bug reports:**
+```bash
+# System info
+uname -a
+psp-gcc --version
+make --version
+
+# Build output
+make 2>&1 | tee build.log
+# Attach build.log
+```
+
+---
+
+**Happy coding! 🎮🔧**
