@@ -1,0 +1,28 @@
+# PSP Build Artifacts
+*.o
+*.elf
+*.prx
+*.sfo
+EBOOT.PBP
+PARAM.SFO
+
+# Build directories
+build/
+*.d
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# User data (don't commit personal configs)
+userdata/
+gamedata/
+
+# Logs
+*.log
